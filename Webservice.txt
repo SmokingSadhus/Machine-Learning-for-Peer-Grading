@@ -1,0 +1,16 @@
+import pip
+pip.main(['install','requests'])
+
+import requests
+url = 'http://peerlogic.csc.ncsu.edu/metareview/metareviewgenerator/content'
+import json
+
+
+dictionary = {'reviews': 'please change the value of the constants. You must not capitalize incorrectly.'}
+
+response = requests.post(url, json=dictionary)
+print response.status_code
+print response.text
+
+
+
