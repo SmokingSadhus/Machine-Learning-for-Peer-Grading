@@ -12,6 +12,7 @@ from sklearn.metrics import mean_squared_error
 from math import sqrt
 from sklearn.metrics import accuracy_score
 from sklearn.naive_bayes import GaussianNB
+from nltk.corpus import stopwords
 
 
 sno = nltk.stem.SnowballStemmer('english')
@@ -192,6 +193,15 @@ def compute_score_similarity(list_of_scores):
     else:
         return (sim_score * 1.0)/countn
 
+def count_wout_stop_words(sentence, no_of_comments):
+    sentence = sentence.lower()
+    words = re.findall(r'\w+', sentence)
+    count = 0
+    for word in words:
+        if word not in  stopwords.words('english'):
+            count = count + 1
+    return count/no_of_comments
+
   
 
 with open('DataSet2.csv') as csvfile:
@@ -204,8 +214,9 @@ with open('DataSet2.csv') as csvfile:
             if noofcomments != 0 :
 #                print(row['assignment_id'],row['reviewer_uid'],row['reviewee_team'],len(re.findall(r'\w+', row['comments']))/noofcomments,getrepetitionvalue(re.findall(r'\w+', row['comments'])) ,row['grade_for_reviewer'])
                  words_per_comment = len(re.findall(r'\w+', row['comments']))/noofcomments
+                 wrds_per_comment_filtered = count_wout_stop_words(row['comments'],noofcomments)
                  repetition_score = getrepetitionvalue(re.findall(r'\w+', row['comments']))
-                 x.append(len(re.findall(r'\w+', row['comments']))/noofcomments)
+                 x.append(wrds_per_comment_filtered)
                  y.append(getrepetitionvalue(re.findall(r'\w+', row['comments'])))
                  z.append(int(row['grade_for_reviewer']))
                  (sugc , locc , errc , idec , negc , posc , summc , nottc , solc) = getcontents(re.findall(r'\w+', row['comments']))
@@ -219,7 +230,7 @@ with open('DataSet2.csv') as csvfile:
                  nottp.append(nottc)
                  solp.append(solc)
                  stdev = np.std([c_to_int(scr) for scr in row['scores'].split(",")])
-                 train_temp.append([row['assignment_id'],row['reviewer_uid'], row['reviewee_team'],row['scores'], words_per_comment,repetition_score,sugc,locc,errc,idec,negc,posc,summc,nottc,solc,stdev])
+                 train_temp.append([row['assignment_id'],row['reviewer_uid'], row['reviewee_team'],row['scores'], wrds_per_comment_filtered,repetition_score,sugc,locc,errc,idec,negc,posc,summc,nottc,solc,stdev])
                  label.append(get_class_value(int(row['grade_for_reviewer'])))
 
 
