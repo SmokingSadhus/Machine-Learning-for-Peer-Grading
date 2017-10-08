@@ -60,6 +60,18 @@ def return_n_grams_with_nouns_replaced(txt):
     add_to_trigram_map(list(ngrams(nltk.word_tokenize(txt), 3)))
     return [list(ngrams(nltk.word_tokenize(txt), 1)), list(ngrams(nltk.word_tokenize(txt), 2)),list(ngrams(nltk.word_tokenize(txt), 3)) ]
 
+def get_class_value(score):
+    if score <= 50:
+        return 0
+    elif score > 50 and score <=70:
+        return 1
+    elif score > 70 and score <=85:
+        return 2
+    elif score > 85 and score <=95:
+        return 3
+    elif score > 95:
+        return 4
+
 #row['comments'] 42320
 
 with open('DataSet2.csv') as csvfile:
@@ -74,7 +86,7 @@ with open('DataSet2.csv') as csvfile:
                 uni_code_text = ''.join(i for i in row['comments'] if ord(i)<128)
                 list_of_uni_bi_tri = return_n_grams_with_nouns_replaced(uni_code_text)
                 train_temp.append(list_of_uni_bi_tri)
-                label.append(int(row['grade_for_reviewer']))
+                label.append(get_class_value(int(row['grade_for_reviewer'])))
             
                 
                  
@@ -102,13 +114,17 @@ for ts in train_temp:
 print 'Step2 done'
 
 X_train, X_test, y_train, y_test = train_test_split(train, label, test_size=0.33, random_state=42)
-clf = tree.DecisionTreeRegressor()
+
+clf = tree.DecisionTreeClassifier()
 clf = clf.fit(X_train, y_train)
 preds = clf.predict(X_test)
+print accuracy_score(preds, y_test)
 
-rms = sqrt(mean_squared_error(preds, y_test))
 
-print rms
+gnb = GaussianNB()
+gnb = gnb.fit(X_train, y_train)
+preds = gnb.predict(X_test)
+print accuracy_score(preds, y_test)
 
 #print sugp
 #print errp
