@@ -74,7 +74,12 @@ def get_class_value(score):
 
 #row['comments'] 42320
 
-with open('DataSet2.csv') as csvfile:
+def process_grades(g):
+	g = g.strip("%")
+	g = g.split(".")
+	return int(g[0])
+
+with open('DataSet4.csv') as csvfile:
     reader = csv.DictReader(csvfile)
     count = 0
     for row in reader:
@@ -86,7 +91,7 @@ with open('DataSet2.csv') as csvfile:
                 uni_code_text = ''.join(i for i in row['comments'] if ord(i)<128)
                 list_of_uni_bi_tri = return_n_grams_with_nouns_replaced(uni_code_text)
                 train_temp.append(list_of_uni_bi_tri)
-                label.append(get_class_value(int(row['grade_for_reviewer'])))
+                label.append(get_class_value(process_grades(row['grade_for_reviewer'])))
             
                 
                  

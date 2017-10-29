@@ -60,9 +60,20 @@ def return_n_grams_with_nouns_replaced(txt):
     add_to_trigram_map(list(ngrams(nltk.word_tokenize(txt), 3)))
     return [list(ngrams(nltk.word_tokenize(txt), 1)), list(ngrams(nltk.word_tokenize(txt), 2)),list(ngrams(nltk.word_tokenize(txt), 3)) ]
 
+from nltk.corpus import stopwords
+cachedStopWords = stopwords.words("english")
+def testFuncNew():
+        text = 'hello bye the the hi'
+        text = ' '.join([word for word in text.split() if word not in cachedStopWords]) 
+
 #row['comments'] 42320
 
-with open('DataSet2.csv') as csvfile:
+def process_grades(g):
+	g = g.strip("%")
+	g = g.split(".")
+	return int(g[0])
+
+with open('DataSet4.csv') as csvfile:
     reader = csv.DictReader(csvfile)
     count = 0
     for row in reader:
@@ -74,7 +85,7 @@ with open('DataSet2.csv') as csvfile:
                 uni_code_text = ''.join(i for i in row['comments'] if ord(i)<128)
                 list_of_uni_bi_tri = return_n_grams_with_nouns_replaced(uni_code_text)
                 train_temp.append(list_of_uni_bi_tri)
-                label.append(int(row['grade_for_reviewer']))
+                label.append(process_grades(row['grade_for_reviewer']))
             
                 
                  

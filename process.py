@@ -233,8 +233,12 @@ def count_wout_stop_words(sentence, no_of_comments):
             count = count + 1
     return count/no_of_comments
 
+def process_grades(g):
+	g = g.strip("%")
+	g = g.split(".")
+	return int(g[0])
 
-with open('DataSet2.csv') as csvfile:
+with open('DataSet4.csv') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         populate_assgn_score_similarit(row['assignment_id'],row['reviewer_uid'],row['scores'])
@@ -248,7 +252,7 @@ with open('DataSet2.csv') as csvfile:
                  repetition_score = getrepetitionvalue(re.findall(r'\w+', row['comments']))
                  x.append(len(re.findall(r'\w+', row['comments']))/noofcomments)
                  y.append(getrepetitionvalue(re.findall(r'\w+', row['comments'])))
-                 z.append(int(row['grade_for_reviewer']))
+                 z.append(process_grades(row['grade_for_reviewer']))
                  (sugc , locc , errc , idec , negc , posc , summc , nottc , solc) = getcontents(re.findall(r'\w+', row['comments']))
                  sugp.append(sugc)
                  locp.append(locc)
@@ -261,7 +265,7 @@ with open('DataSet2.csv') as csvfile:
                  solp.append(solc)
                  stdev = np.std([c_to_int(scr) for scr in row['scores'].split(",")])
                  train_temp.append([row['assignment_id'],row['reviewer_uid'], row['reviewee_team'],row['scores'], wrds_per_comment_filtered,repetition_score,sugc,locc,errc,idec,negc,posc,summc,nottc,solc,stdev])
-                 label.append(int(row['grade_for_reviewer']))
+                 label.append(process_grades(row['grade_for_reviewer']))
 
 
 for ts in train_temp:
