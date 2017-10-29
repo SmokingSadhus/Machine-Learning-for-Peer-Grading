@@ -165,7 +165,7 @@ def compute_diff(s1, s2):
     if(len(s1_array) != len(s2_array)):
         return 'NA'
     else:
-        return sum([((s1_i - s2_i) * (s1_i - s2_i)) for s1_i, s2_i in zip(s1_array, s2_array)])
+        return sqrt((sum([((s1_i - s2_i) * (s1_i - s2_i)) for s1_i, s2_i in zip(s1_array, s2_array)]))/len(s1_array))
 
 def compute_diff_from_other_scores(scores,list_of_scores):
     count = 0
