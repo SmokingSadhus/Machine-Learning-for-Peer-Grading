@@ -251,22 +251,52 @@ for ts in train_temp:
     l_appen.append(diff_score)
     train.append(l_appen)
 
+def decision_tree_classifier():
+    return tree.DecisionTreeClassifier()
 
-X_train, X_test, y_train, y_test = train_test_split(train, label, test_size=0.33, random_state=42)
+def k_fold_cross_verify(train,label, ml_method):
+    score_cum_dt = 0
+    k_fold = StratifiedKFold(n_splits=5,shuffle=True,random_state=42)
+    train = np.array(train)
+    label = np.array(label)
+    for tr_id, ts_id in k_fold.split(train, label):
+        Features_train, Features_test,Labels_train, Labels_test = train[tr_id], train[ts_id],label[tr_id], label[ts_id]
+        cl = ml_method()
+        cl = cl.fit(Features_train, Labels_train)
+        res = cl.predict(Features_test)
+        score_cum_dt = score_cum_dt + f1_score(Labels_test,res)
+    return score_cum_dt/5
+
+
+#X_train, X_test, y_train, y_test = train_test_split(train, label, test_size=0.33, random_state=42)
+def rfecv(train, label, classifier):
+    estimator = classifier
+    #selector = RFECV(estimator, step=1, cv=4)
+    selector = RFECV(estimator, step=1)
+    selector = selector.fit(train, label)
+    print selector.support_
+    print selector.ranking_
+    #print selector.score(X_test,y_test)
+
 
 clf = tree.DecisionTreeClassifier()
-clf = clf.fit(X_train, y_train)
-preds = clf.predict(X_test)
-print accuracy_score(preds, y_test)
+#clf = clf.fit(X_train, y_train)
+#preds = clf.predict(X_test)
+#print accuracy_score(preds, y_test)
 
 
 gnb = GaussianNB()
-gnb = gnb.fit(X_train, y_train)
-preds = gnb.predict(X_test)
-print accuracy_score(preds, y_test)
+#gnb = gnb.fit(X_train, y_train)
+#preds = gnb.predict(X_test)
+#print accuracy_score(preds, y_test)
 
 #clf.predict()
 
+#rfecv(train, label, clf)
+
+print k_fold_cross_verify(train,label,decision_tree_classifier)
+
+#select_from_model(train,label,clf)
 
 
 #print sugp
