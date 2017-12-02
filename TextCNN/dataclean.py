@@ -1,5 +1,6 @@
 import csv
 import re
+import numpy as np
 
 def clean_str(str):
     str = ''.join(i for i in str if ord(i)<128)
@@ -12,15 +13,15 @@ def clean_str(str):
 
 def get_class_value(score):
     if score <= 50:
-        return 0
+        return [1,0,0,0,0]
     elif score > 50 and score <=70:
-        return 1
+        return [0,1,0,0,0]
     elif score > 70 and score <=85:
-        return 2
+        return [0,0,1,0,0]
     elif score > 85 and score <=95:
-        return 3
+        return [0,0,0,1,0]
     elif score > 95:
-        return 4
+        return [0,0,0,0,1]
 
 
 def c_to_int(string):
@@ -74,5 +75,5 @@ def batch_iter(data, batch_size, num_epochs, shuffle=True):
             yield shuffled_data[start_index:end_index]
             
         
-[a,b] = load_data_and_labels('DataSet5.csv')
+#[a,b] = load_data_and_labels('DataSet5.csv')
 #print (clean_str('Yes, but for the purposes of our class and the review process,'))
