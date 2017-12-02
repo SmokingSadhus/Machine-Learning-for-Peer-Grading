@@ -455,11 +455,11 @@ def rfecv(train, label, regressor):
 
 
 #print k_fold_cross_verify(train,label,decision_tree_regression)
-#estimator = tree.DecisionTreeRegressor()
+estimator = tree.DecisionTreeRegressor()
 #estimator = LogisticRegression()
 #estimator = SVR(kernel="linear")
 
-#rfecv(train, label, estimator)
+rfecv(train, label, estimator)
 
 #select_from_model(train,label,estimator)
 
@@ -468,13 +468,13 @@ def rfecv(train, label, regressor):
 
 
 
-X_train, X_test, y_train, y_test = train_test_split(train, label, test_size=0.10, random_state=42)
+#X_train, X_test, y_train, y_test = train_test_split(train, label, test_size=0.10, random_state=42)
 
-clf = tree.DecisionTreeRegressor()
-clf = clf.fit(X_train, y_train)
-preds = clf.predict(X_test)
+#clf = tree.DecisionTreeRegressor()
+#clf = clf.fit(X_train, y_train)
+#preds = clf.predict(X_test)
 
-rms = sqrt(mean_squared_error(preds, y_test))
+#rms = sqrt(mean_squared_error(preds, y_test))
 
 #print rms
 
