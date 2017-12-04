@@ -11,7 +11,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 from math import sqrt
 from textblob import TextBlob
+from sklearn.neural_network import MLPRegressor
+from sklearn.preprocessing import StandardScaler
 from nltk import ngrams
+from nltk.corpus import stopwords
+cachedStopWords = stopwords.words("english")
 
         
 def c_to_int(string):
@@ -31,18 +35,24 @@ trigram_map = dict()
 
 def add_to_unigram_map(unigrams):
     for uni in unigrams:
-        unigram_map[uni] = 0
-        
-            
+        if uni in unigram_map:
+            unigram_map[uni] = unigram_map[uni] + 1
+        else:
+            unigram_map[uni] = 1
 
 def add_to_bigram_map(bigrams):
     for bi in bigrams:
-        bigram_map[bi] = 0
+        if bi in bigram_map:
+            bigram_map[bi] = bigram_map[bi] + 1
+        else:
+            bigram_map[bi] = 1
 
 def add_to_trigram_map(trigrams):
     for tri in trigrams:
-        trigram_map[tri] = 0
-
+        if tri in trigram_map:
+            trigram_map[tri] = trigram_map[tri] + 1
+        else:
+            trigram_map[tri] = 1
 
 def return_n_grams_with_nouns_replaced(txt):
     blob = TextBlob(txt)
@@ -55,16 +65,28 @@ def return_n_grams_with_nouns_replaced(txt):
     for n in n_array:
         if (n[1] == 'NN' or n[1] == 'NNP' or n[1] == 'NNS' or n[1] == 'NNPS'):
             txt = txt.replace(n[0].lower(),'N',1)
-    add_to_unigram_map(list(ngrams(nltk.word_tokenize(txt), 1))) 
-    add_to_bigram_map(list(ngrams(nltk.word_tokenize(txt), 2)))
-    add_to_trigram_map(list(ngrams(nltk.word_tokenize(txt), 3)))
-    return [list(ngrams(nltk.word_tokenize(txt), 1)), list(ngrams(nltk.word_tokenize(txt), 2)),list(ngrams(nltk.word_tokenize(txt), 3)) ]
+    uni = list(ngrams(nltk.word_tokenize(txt), 1))
+    uni_final = []
+    for lst in uni:
+        uni_final.append(lst[0])
+    bi = list(ngrams(nltk.word_tokenize(txt), 2))
+    bi_final = []
+    for lst in bi:
+        bi_final.append(lst[0] +' '+ lst[1])
+    tri = list(ngrams(nltk.word_tokenize(txt), 3))
+    tri_final = []
+    for lst in tri:
+        tri_final.append(lst[0] + ' '+lst[1] + ' '+ lst[2])
+    add_to_unigram_map(uni_final) 
+    add_to_bigram_map(bi_final)
+    add_to_trigram_map(tri_final)
+    return [uni_final, bi_final, tri_final]
 
-from nltk.corpus import stopwords
-cachedStopWords = stopwords.words("english")
-def testFuncNew():
-        text = 'hello bye the the hi'
-        text = ' '.join([word for word in text.split() if word not in cachedStopWords]) 
+
+
+def filter_stop_words():
+    text = 'hello bye the the hi'
+    text = ' '.join([word for word in text.split() if word not in cachedStopWords]) 
 
 #row['comments'] 42320
 
@@ -73,7 +95,7 @@ def process_grades(g):
 	g = g.split(".")
 	return int(g[0])
 
-with open('DataSet4.csv') as csvfile:
+with open('DataSet5.csv') as csvfile:
     reader = csv.DictReader(csvfile)
     count = 0
     for row in reader:
@@ -86,71 +108,67 @@ with open('DataSet4.csv') as csvfile:
                 list_of_uni_bi_tri = return_n_grams_with_nouns_replaced(uni_code_text)
                 train_temp.append(list_of_uni_bi_tri)
                 label.append(process_grades(row['grade_for_reviewer']))
-            
-                
                  
-                 
-print 'Step1 done'
+print ('Step1 done')
+
+final_gram_map = dict()
+
+for key in unigram_map.keys():
+    if(unigram_map[key] > 100):
+        final_gram_map[key] = 0
+
+for key in bigram_map.keys():
+    if(bigram_map[key] > 200):
+        final_gram_map[key] = 0
+
+for key in trigram_map.keys():
+    if(trigram_map[key] > 200):
+        final_gram_map[key] = 0
+
+#exit()
 
 for ts in train_temp:
-    uni_dict_cl = unigram_map.copy()
-    bi_dict_cl = bigram_map.copy()
-    tri_dict_cl = trigram_map.copy()
+    final_dict_cl = final_gram_map.copy()
     uni_list = ts[0]
     bi_list = ts[1]
     tri_list = ts[2]
     for uni in uni_list:
-        uni_dict_cl[uni]= uni_dict_cl[uni]+1
+        if uni in final_dict_cl:
+            final_dict_cl[uni]= final_dict_cl[uni]+1
     for bi in bi_list:
-        bi_dict_cl[bi]= bi_dict_cl[bi]+1
+        if bi in final_dict_cl:
+            final_dict_cl[bi]= final_dict_cl[bi]+1
     for tri in tri_list:
-        tri_dict_cl[tri]= tri_dict_cl[tri]+1
-    f_list = uni_dict_cl.values()
-    f_list = f_list + bi_dict_cl.values()
-    f_list = f_list + tri_dict_cl.values()
-    train.append(f_list)
+        if tri in final_dict_cl:
+            final_dict_cl[tri]= final_dict_cl[tri]+1
+    f_list = final_dict_cl.values()
+    list_added = []
+    for lt in f_list:
+        list_added.append(lt)
+    train.append(list_added)
     
-print 'Step2 done'
+print ('Step2 done')
+
+#train = np.array(train)
+#label = np.array(label)
+
 
 X_train, X_test, y_train, y_test = train_test_split(train, label, test_size=0.33, random_state=42)
-clf = tree.DecisionTreeRegressor()
-clf = clf.fit(X_train, y_train)
-preds = clf.predict(X_test)
+
+reg1 = tree.DecisionTreeRegressor()
+reg1 = reg1.fit(X_train, y_train)
+preds = reg1.predict(X_test)
 
 rms = sqrt(mean_squared_error(preds, y_test))
+print (rms)
 
-print rms
+scaler = StandardScaler()
+scaler.fit(X_train)
+X_train = scaler.transform(X_train)
+X_test = scaler.transform(X_test)
+reg2 = MLPRegressor(hidden_layer_sizes=(500,))
+reg2 = reg2.fit(X_train, y_train)
+preds2 = reg2.predict(X_test)
 
-#print sugp
-#print errp
-#print negp
-#print solp
-
-#print pearsonr(x,z)           
-#print pearsonr(y,z)        
-#plt.figure(1)
-#plt.subplot(211)
-#plt.plot(x,z,'ro')
-#plt.subplot(212)
-#plt.plot(y,z,'ro')
-#plt.axis([0, 10000, 0, 100])
-#plt.subplots_adjust(hspace = 0.8)
-#plt.savefig('visualization.png')
-
-#plt.figure(1)
-#plt.subplot(411)
-#plt.plot(sugp,z,'ro')
-#plt.xlabel('Suggestion Percent')
-#plt.subplot(412)
-#plt.plot(locp,z,'ro')
-#plt.xlabel('location percent')
-#plt.subplot(413)
-#plt.plot(errp,z,'ro')
-#plt.xlabel('error terms percent')
-#plt.subplot(414)
-#plt.plot(summp,z,'ro')
-#plt.xlabel('summarising terms percent')
-
-#plt.subplots_adjust(hspace = 0.8)
-#plt.savefig('visualization_1.png')
-
+rms = sqrt(mean_squared_error(preds2, y_test))
+print (rms)
