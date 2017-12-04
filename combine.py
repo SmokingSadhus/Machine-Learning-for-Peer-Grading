@@ -598,10 +598,22 @@ y_train_ke, y_test_ke = y_shuffled[:dev_sample_index], y_shuffled[dev_sample_ind
 
 ###################### Combine outputs from NN with those obtaiined from KE ##################################
 comb_tr = []
+comb_tst = []
 
 for i in range(0,len(nn_ops_train)):
-    comb_tr.append(nn_ops_train[i] + X_train_ke[i])
+    comb_tr.append(np.concatenate((nn_ops_train[i], X_train_ke[i]), axis = 0))
 
-    
+for i in range(0,len(nn_ops_test)):
+    comb_tst.append(np.concatenate((nn_ops_test[i] , X_test_ke[i]), axis = 0))
+
+print (len(comb_tr))
+print (len(comb_tst))
+
+t = tree.DecisionTreeRegressor()
+t = t.fit(comb_tr, y_train_ke)#same as y_train
+preds = t.predict(comb_tst)
+
+rms = sqrt(mean_squared_error(preds, y_test_ke))#same as y_test
+print (rms)
     
 

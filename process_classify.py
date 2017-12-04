@@ -16,7 +16,7 @@ from sklearn.naive_bayes import GaussianNB
 from nltk.corpus import stopwords
 from textblob import TextBlob
 from nltk.corpus import wordnet
-
+from sklearn.feature_selection import mutual_info_classif
 
 sno = nltk.stem.SnowballStemmer('english')
 ps = nltk.stem.PorterStemmer()
@@ -363,15 +363,18 @@ def k_fold_cross_verify(train,label, ml_method):
 
 
 
-def rfecv(train, label, classifier):
-    estimator = classifier
-    #selector = RFECV(estimator, step=1, cv=4)
-    selector = RFECV(estimator, step=1)
-    selector = selector.fit(train, label)
-    print selector.support_
-    print selector.ranking_
-    #print selector.score(X_test,y_test)
 
+
+################ Univariate#######################################
+def univariate_feature_selection(train,label):
+    selector = SelectKBest(mutual_info_classif, k=7)
+    selector.fit(train, label)
+    print selector.scores_
+    print selector.get_support()
+
+#univariate_feature_selection(train, label)
+
+######################Univariate ends#################################
 
 #X_train, X_test, y_train, y_test = train_test_split(train, label, test_size=0.33, random_state=42)
 
@@ -388,43 +391,23 @@ def rfecv(train, label, classifier):
 
 #clf.predict()
 
-rfecv(train, label, clf)
+##############RFECV###########################
+def rfecv(train, label, classifier):
+    estimator = classifier
+    #selector = RFECV(estimator, step=1, cv=4)
+    selector = RFECV(estimator, step=1)
+    selector = selector.fit(train, label)
+    print selector.support_
+    print selector.ranking_
+    #print selector.score(X_test,y_test)
 
-#print k_fold_cross_verify(train,label,decision_tree_classifier)
+
+#rfecv(train, label, clf)
+##############RFECV ends###########################
+
+print k_fold_cross_verify(train,label,decision_tree_classifier)
 
 #select_from_model(train,label,clf)
 
 
-#print sugp
-#print errp
-#print negp
-#print solp
-
-#print pearsonr(x,z)           
-#print pearsonr(y,z)        
-#plt.figure(1)
-#plt.subplot(211)
-#plt.plot(x,z,'ro')
-#plt.subplot(212)
-#plt.plot(y,z,'ro')
-#plt.axis([0, 10000, 0, 100])
-#plt.subplots_adjust(hspace = 0.8)
-#plt.savefig('visualization.png')
-
-#plt.figure(1)
-#plt.subplot(411)
-#plt.plot(sugp,z,'ro')
-#plt.xlabel('Suggestion Percent')
-#plt.subplot(412)
-#plt.plot(locp,z,'ro')
-#plt.xlabel('location percent')
-#plt.subplot(413)
-#plt.plot(errp,z,'ro')
-#plt.xlabel('error terms percent')
-#plt.subplot(414)
-#plt.plot(summp,z,'ro')
-#plt.xlabel('summarising terms percent')
-
-#plt.subplots_adjust(hspace = 0.8)
-#plt.savefig('visualization_1.png')
 

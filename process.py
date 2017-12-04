@@ -6,7 +6,7 @@ import inflect
 from nltk.util import ngrams
 from scipy.stats.stats import pearsonr
 from nltk.stem import PorterStemmer
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from sklearn import tree
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
@@ -406,6 +406,7 @@ def k_fold_cross_verify(train,label, ml_method):
 def decision_tree_regression():
     return tree.DecisionTreeRegressor()
 
+#################### select from model (doesnt work) ############
 def select_from_model(train,label,regressor):
     estimator = regressor
     sfm = SelectFromModel(estimator, threshold=0.25)
@@ -415,15 +416,6 @@ def select_from_model(train,label,regressor):
     print sfm.get_support()
     #print sfm.get_ranking()    
 
-def univariate_feature_selection(train,label):
-    selector = SelectKBest(mutual_info_regression, k=7)
-    selector.fit(train, label)
-    print selector.scores_
-    print selector.get_support()
-    
-    
-    
-
 def k_fold_cross_verify_SelectFromModel(train,label):
     estimator = DecisionTreeRegressor()
     sfm = SelectFromModel(estimator, threshold=0.25)
@@ -432,15 +424,21 @@ def k_fold_cross_verify_SelectFromModel(train,label):
     k_fold = KFold(n_splits=5,shuffle=True,random_state=42)
     for tr_id, ts_id in k_fold.split(train, label):
         Features_train, Features_test,Labels_train, Labels_test = train[tr_id], train[ts_id],label[tr_id], label[ts_id]
-        
-###        sfm = sfm.fit(Features_train, Labels_train)
-#        tx_test = sfm.transform(Features_test)
 
-
+#sfm = sfm.fit(Features_train, Labels_train)
+#tx_test = sfm.transform(Features_test)
 #sfm.fit(train, label)
+#select_from_model(train,label,estimator)
+#################### select from model ends(doesnt work) ############
+ 
+############## Kfold cross verify ###################################
 
-#def 
-#################################RFECV Code###################################
+print k_fold_cross_verify(train,label,decision_tree_regression)
+
+########### Kfold ends ####################################
+
+    
+##################### RFECV code ##############################
 def rfecv(train, label, regressor):
     estimator = regressor
     #selector = RFECV(estimator, step=1, cv=4)
@@ -449,25 +447,27 @@ def rfecv(train, label, regressor):
     print selector.support_
     print selector.ranking_
     #print selector.score(X_test,y_test)
-##############################################################
-
-
-
-
-#print k_fold_cross_verify(train,label,decision_tree_regression)
-estimator = tree.DecisionTreeRegressor()
-#estimator = LogisticRegression()
+    
+#estimator = tree.DecisionTreeRegressor()
 #estimator = SVR(kernel="linear")
 
-rfecv(train, label, estimator)
+#rfecv(train, label, estimator)
 
-#select_from_model(train,label,estimator)
+##################### RFECV code ends ##############################
 
+
+################ Univariate#######################################
+def univariate_feature_selection(train,label):
+    selector = SelectKBest(mutual_info_regression, k=7)
+    selector.fit(train, label)
+    print selector.scores_
+    print selector.get_support()
 
 #univariate_feature_selection(train, label)
 
+######################Univariate ends#################################
 
-
+############### Static split #########################
 #X_train, X_test, y_train, y_test = train_test_split(train, label, test_size=0.10, random_state=42)
 
 #clf = tree.DecisionTreeRegressor()
@@ -477,37 +477,4 @@ rfecv(train, label, estimator)
 #rms = sqrt(mean_squared_error(preds, y_test))
 
 #print rms
-
-#print sugp
-#print errp
-#print negp
-#print solp
-
-#print pearsonr(x,z)           
-#print pearsonr(y,z)        
-#plt.figure(1)
-#plt.subplot(211)
-#plt.plot(x,z,'ro')
-#plt.subplot(212)
-#plt.plot(y,z,'ro')
-#plt.axis([0, 10000, 0, 100])
-#plt.subplots_adjust(hspace = 0.8)
-#plt.savefig('visualization.png')
-
-#plt.figure(1)
-#plt.subplot(411)
-#plt.plot(sugp,z,'ro')
-#plt.xlabel('Suggestion Percent')
-#plt.subplot(412)
-#plt.plot(locp,z,'ro')
-#plt.xlabel('location percent')
-#plt.subplot(413)
-#plt.plot(errp,z,'ro')
-#plt.xlabel('error terms percent')
-#plt.subplot(414)
-#plt.plot(summp,z,'ro')
-#plt.xlabel('summarising terms percent')
-
-#plt.subplots_adjust(hspace = 0.8)
-#plt.savefig('visualization_1.png')
-
+############### Static split ends #########################
