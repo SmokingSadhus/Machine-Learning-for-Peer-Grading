@@ -24,6 +24,8 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import mutual_info_regression
 from sklearn.feature_selection import f_regression
 from nltk.corpus import wordnet
+from sklearn.neural_network import MLPRegressor
+from sklearn.preprocessing import StandardScaler
 
 sno = nltk.stem.SnowballStemmer('english')
 ps = nltk.stem.PorterStemmer()
@@ -401,10 +403,30 @@ def k_fold_cross_verify(train,label, ml_method):
         res = cl.predict(Features_test)
         score_cum_dt = score_cum_dt + sqrt(mean_squared_error(Labels_test,res))
     return score_cum_dt/5
+
+def k_fold_cross_verify_scaling(train,label, ml_method):
+    score_cum_dt = 0
+    k_fold = KFold(n_splits=5,shuffle=True,random_state=42)
+    train = np.array(train)
+    label = np.array(label)
+    for tr_id, ts_id in k_fold.split(train, label):
+        Features_train, Features_test,Labels_train, Labels_test = train[tr_id], train[ts_id],label[tr_id], label[ts_id]
+        scaler = StandardScaler()
+        scaler.fit(Features_train)
+        Features_train = scaler.transform(Features_train)
+        Features_test = scaler.transform(Features_test)
+        cl = ml_method()
+        cl = cl.fit(Features_train, Labels_train)
+        res = cl.predict(Features_test)
+        score_cum_dt = score_cum_dt + sqrt(mean_squared_error(Labels_test,res))
+    return score_cum_dt/5
     
         
 def decision_tree_regression():
     return tree.DecisionTreeRegressor()
+
+def nn_regression():
+    return MLPRegressor(hidden_layer_sizes=(5,2,))
 
 #################### select from model (doesnt work) ############
 def select_from_model(train,label,regressor):
@@ -433,7 +455,9 @@ def k_fold_cross_verify_SelectFromModel(train,label):
  
 ############## Kfold cross verify ###################################
 
-print k_fold_cross_verify(train,label,decision_tree_regression)
+#print k_fold_cross_verify(train,label,decision_tree_regression)
+
+print (k_fold_cross_verify_scaling(train,label,nn_regression)) # scaling required here
 
 ########### Kfold ends ####################################
 
@@ -444,8 +468,8 @@ def rfecv(train, label, regressor):
     #selector = RFECV(estimator, step=1, cv=4)
     selector = RFECV(estimator, step=1,cv=5, scoring = 'neg_mean_squared_log_error')
     selector = selector.fit(train, label)
-    print selector.support_
-    print selector.ranking_
+    print (selector.support_)
+    print (selector.ranking_)
     #print selector.score(X_test,y_test)
     
 #estimator = tree.DecisionTreeRegressor()
@@ -460,8 +484,8 @@ def rfecv(train, label, regressor):
 def univariate_feature_selection(train,label):
     selector = SelectKBest(mutual_info_regression, k=7)
     selector.fit(train, label)
-    print selector.scores_
-    print selector.get_support()
+    print (selector.scores_)
+    print (selector.get_support())
 
 #univariate_feature_selection(train, label)
 
