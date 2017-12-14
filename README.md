@@ -13,7 +13,7 @@ Divide the available labelled data into training and test set and use the traini
 If the network does not show good results on the test set, try using a different neural network or a different classification technique like a decision tree.
 Prepare a report with the final results achieved and any suggestions for improvement.
 
-### Running the code:
+### Running the code (Datasets required for running the code have not been put up on Github. They have been shared with Dr. Gehringer. Kindly contact him if you need to run this code.):
 
 The following Python files are executable:
 1) process.py (significant features -regression)
