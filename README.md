@@ -12,3 +12,21 @@ Convert the features to numerical values for training the network.
 Divide the available labelled data into training and test set and use the training set to train the neural network.
 If the network does not show good results on the test set, try using a different neural network or a different classification technique like a decision tree.
 Prepare a report with the final results achieved and any suggestions for improvement.
+
+### Running the code:
+
+The following Python files are executable:
+1) process.py (significant features -regression)
+2) process_classify.py (significant features - classification)
+3) process_n_grams.py (N-grams regression)
+4) process_n_grams_classify.py (N-grams classification)
+5) combine.py (significant features + N-grams regression)
+6) combine_classify.py (significant features + N-grams classification)
+7) TextCNN/train.py (Text based Convolutional Neural Networks)
+
+For running 1 - 6 ,simply use python filename.py
+The following packages need to be installed:
+nltk, numpy, scipy, sklearn, textblob, inflect
+
+For running 7, you will need to install tensorflow.
+
