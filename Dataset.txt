@@ -1,0 +1,50 @@
+There are 2 datasets: DataSet5.csv and DataSetJoin.csv . The reason for this is that for every assignment, a reviewer gets a single review grade for all the reviews that he does. The individual reviews are not graded. 
+
+For DataSet5, we have applied the score given for the assignment to each of the individual review that the reviewer has done. This results in a lareger number of data points. 
+
+For DataSetDiffJoin, we club all the reviews by a reviewer for a single assignment and apply the instructor grade to this combined review
+
+For all review, here are the columns:
+
+assignemnt_id,
+reviewer_uid,
+reviewee_team = The team/individual whose work was reviewed (useless for DataSetJoin.csv)
+scores = comma separated review scores for the various criteria in the review 
+comments = comments for the various criteria in the review. Separator used is *!!
+questions = questions for the various criteria in the review. Separator used is *!! (question, scores and comments should be same in number as they correspond to each other) 
+grade_for_reviewer = instructor grade for the review.
+
+
+
+
+I am sharing DataSet5.csv, DataSetJoin.csv, and Data_To_be_Joined_inCsv (purpose explained bellow)
+
+Steps for putting together the data:
+
+1) read file review_comments.csv(shared by Dr. Ferry) into table review_comments.
+2) read file review_grades.csv (shared by Dr. Ferry) into table review_grades.
+3) read file Data_To_be_Joined_inCsv.csv(Created by me using the remaining grades(those not stored in Expertiza) for 517 and 506 shared by Dr. Gehringer) into table other_grades.
+
+Use the following queries:
+
+For DataSet5.csv:
+ select temp.assignment_id, temp.reviewer_uid, temp.reviewee_team, temp.scores, temp.comments, temp.questions, 
+IF (((r.grade_for_reviewer is NULL) or (r.grade_for_reviewer = 'NULL')),r1.grade,r.grade_for_reviewer) as grade_for_reviewer 
+from
+(SELECT assignment_id, reviewer_uid, reviewee_team, GROUP_CONCAT(comment SEPARATOR '*!!') as comments, GROUP_CONCAT(score SEPARATOR ',') as scores, GROUP_CONCAT(question SEPARATOR '*!!') as questions  FROM review_comments GROUP BY assignment_id, reviewer_uid,reviewee_team)
+as temp	
+left join review_grades r on temp.assignment_id = r.assignment_id AND temp.reviewer_uid = r.reviewer_uid
+left join other_grades r1 on temp.assignment_id = r1.assignmentno AND temp.reviewer_uid = r1.unityid
+
+For  DataSetDiffJoin.csv
+select temp.assignment_id, temp.reviewer_uid, temp.reviewee_team, temp.scores, temp.comments, temp.questions, 
+IF (((r.grade_for_reviewer is NULL) or (r.grade_for_reviewer = 'NULL')),r1.grade,r.grade_for_reviewer) as grade_for_reviewer 
+from
+(SELECT assignment_id, reviewer_uid, reviewee_team, GROUP_CONCAT(comment SEPARATOR '*!!') as comments, GROUP_CONCAT(score SEPARATOR ',') as scores, GROUP_CONCAT(question SEPARATOR '*!!') as questions  FROM review_comments GROUP BY assignment_id, reviewer_uid)
+as temp	
+left join review_grades r on temp.assignment_id = r.assignment_id AND temp.reviewer_uid = r.reviewer_uid
+left join other_grades r1 on temp.assignment_id = r1.assignmentno AND temp.reviewer_uid = r1.unityid
+
+########## Note that for the second query since in the nested query, we do not use reviewee_team in the groupby clause, we should not ideally use it in the select statement, however MySql does not give an error and randomly selects
+any team from amongst the available teams. However keep in mind that the column reviewee_team is incorrect for the 2nd dataset as all the reviews by a reviewer for an assignment are clubbed together.
+
